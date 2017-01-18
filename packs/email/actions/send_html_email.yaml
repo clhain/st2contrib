@@ -1,0 +1,39 @@
+---
+  name: "send_html_email"
+  runner_type: "run-python"
+  description: "Send an email with html."
+  enabled: true
+  entry_point: "send_html_email.py"
+  parameters:
+    email_from:
+      type: "string"
+      description: "Email to use as FROM."
+      required: true
+    email_to:
+      type: "string"
+      description: "Email to send TO."
+      required: true
+    email_cc:
+      type: "string"
+      description: "Email to Cc."
+      required: false
+    account:
+      type: "string"
+      description: "Account to use. Must be configured in the email pack config.yaml"
+      required: true
+    subject:
+      type: "string"
+      description: "Subject of the email"
+      required: true
+    message_text:
+      type: "string"
+      description: "Message to send on the email in text format"
+      required: false
+    message_html:
+      type: "string"
+      description: "Message to send on the email in html format"
+      required: false
+    message_images:
+      type: "array"
+      description: "Images to attach to the message"
+      required: false
