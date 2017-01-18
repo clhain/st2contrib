@@ -1,0 +1,23 @@
+---
+  name: "process_email_headers"
+  runner_type: "run-python"
+  description: "Process email headers for CC list and permitted users."
+  enabled: true
+  entry_point: "process_email_headers.py"
+  parameters:
+    headers:
+      type: "array"
+      description: "Email headers to parse."
+      required: true
+    enforce_cc:
+      type: "array"
+      description: "List of addresses to CC on every message."
+      required: false
+    allowed_domains:
+      type: "array"
+      description: "List of domains allowed to trigger workflow."
+      required: false
+    allowed_users:
+      type: "array"
+      description: "List of users allowed to trigger workflow."
+      required: false
