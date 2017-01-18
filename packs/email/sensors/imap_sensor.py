@@ -84,6 +84,10 @@ class IMAPSensor(PollingSensor):
             folder = config.get('mailbox', 'INBOX')
             ssl = config.get('ssl', False)
             download_attachments = config.get('download_attachments', DEFAULT_DOWNLOAD_ATTACHMENTS)
+            poll = config.get('poll', True)
+
+            if not poll:
+              continue
 
             if not user or not password:
                 self._logger.debug("""[IMAPSensor]: Missing
