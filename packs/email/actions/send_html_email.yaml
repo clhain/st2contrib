@@ -17,6 +17,14 @@
       type: "string"
       description: "Email to Cc."
       required: false
+    email_references:
+      type: "string"
+      description: "Email references."
+      required: false
+    email_in_reply_to:
+      type: "string"
+      description: "Email in reply to"
+      required: false
     account:
       type: "string"
       description: "Account to use. Must be configured in the email pack config.yaml"
