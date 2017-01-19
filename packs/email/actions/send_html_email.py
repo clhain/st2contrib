@@ -20,14 +20,17 @@ class SendEmail(Action):
     and images from stackstorm.
   """
 
-  def run(self, email_from, email_to, email_cc, subject, account, message_text,
-          message_html, message_images):
+  def run(self, email_from, email_to, email_cc, email_references,
+          email_in_reply_to, subject, account, message_text, message_html,
+          message_images):
     """Send a multipart html / text email with images from stackstorm.
 
     Args:
       email_from: From address of sender
       email_to: To address of recipient
       email_cc: Cc list of addresses to copy
+      email_references: String containing message reference ids
+      email_in_reply_to: String containing message id of reply email
       subject: Subject of email message
       account: name of account to use (as specified in config.yaml under project
       message_text: plain text message to send
@@ -41,7 +44,7 @@ class SendEmail(Action):
     if accounts is None:
       raise ValueError('"imap_mailboxes" config value is required to send '
                        'email.')
-    if accounts:
+    if not accounts:
       raise ValueError('at least one account is required to send email.')
 
     try:
@@ -56,6 +59,8 @@ class SendEmail(Action):
     msg_root['From'] = email_from
     msg_root['To'] = email_to
     msg_root['Cc'] = email_cc
+    msg_root['References'] = email_references
+    msg_root['In-Reply-To'] = email_in_reply_to
     toaddrs = email_to.split(', ') + email_cc.split(', ')
     msg_root.preamble = 'This is a multi-part message in MIME format.'
     msg_alt = MIMEMultipart('alternative')
