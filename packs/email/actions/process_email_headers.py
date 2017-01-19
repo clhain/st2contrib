@@ -14,6 +14,8 @@ TO_HEADER_STRING = 'To'
 FROM_HEADER_STRING = 'From'
 CC_HEADER_STRING = 'Cc'
 DELIVERED_TO_HEADER_STRING = 'Delivered-To'
+REFERENCES_STRING = 'References'
+MESSAGE_ID_STRING = 'Message-Id'
 
 
 class ProcessEmailHeaders(Action):
@@ -35,11 +37,15 @@ class ProcessEmailHeaders(Action):
       header_from: set of tuples containing from addresses
       header_cc: set of tuples containing cc addresses
       header_self: set of tuples containing delivered-to address
+      header_references: string containing reference message ids
+      header_reply_to: string containing original reference message id
     """
     header_to = set()
     header_from = set()
     header_cc = set()
     header_self = set()
+    header_reply_to = ''
+    header_references = ''
     for header in headers:
       if header[0] in [TO_HEADER_STRING, FROM_HEADER_STRING, CC_HEADER_STRING,
                        DELIVERED_TO_HEADER_STRING]:
@@ -54,7 +60,14 @@ class ProcessEmailHeaders(Action):
             header_cc.add(addr_tuple)
           elif header[0] == DELIVERED_TO_HEADER_STRING:
             header_self.add(addr_tuple)
-    return header_to, header_from, header_cc, header_self
+      if header[0] == REFERENCES_STRING:
+        header_references += header[1]
+      if header[0] == MESSAGE_ID_STRING:
+        header_reply_to = header[1]
+    if header_reply_to:
+      header_references = '%s %s' % (header_references, header_reply_to)
+    return(header_to, header_from, header_cc, header_self, header_references,
+           header_reply_to)
 
   def check_allowed(self, header_from, allowed_domains, allowed_users):
     """If a list of allowed domains or users is included, check sender against.
@@ -113,7 +126,7 @@ class ProcessEmailHeaders(Action):
     return header_cc
 
   def process_results(self, result, header_from, header_to, header_cc,
-                      header_self):
+                      header_self, header_references, header_in_reply_to):
     """Join all address sets and create return object strings.
 
     Args:
@@ -122,6 +135,8 @@ class ProcessEmailHeaders(Action):
       header_to: set of address tuples in to field
       header_cc: set of address tuples in cc field
       header_self: set of address tuples in the delivered-to field
+      header_references: string of reference message ids
+      header_in_reply_to: string containing original message id
 
     Returns:
       result: object to return to stackstorm
@@ -142,11 +157,14 @@ class ProcessEmailHeaders(Action):
       cc_addrs.append(email.utils.formataddr(addr))
     result['cc'] = ', '.join(cc_addrs)
     result['from'] = email.utils.formataddr(header_self.pop())
+    result['references'] = header_references
+    result['in_reply_to'] = header_in_reply_to
     return result
 
   def run(self, headers, enforce_cc, allowed_domains, allowed_users):
     result = {'to': '', 'from': '', 'cc': ''}
-    header_to, header_from, header_cc, header_self = self.parse_headers(headers)
+    (header_to, header_from, header_cc, header_self, header_references,
+     header_in_reply_to) = self.parse_headers(headers)
     if allowed_domains or allowed_users:
       if not self.check_allowed(header_from, allowed_domains, allowed_users):
         self.logger.info('User not permitted: %s',
@@ -156,5 +174,6 @@ class ProcessEmailHeaders(Action):
       header_cc = self.add_enforced_cc(enforce_cc, header_to, header_cc,
                                        header_from)
     result = self.process_results(result, header_from, header_to, header_cc,
-                                  header_self)
+                                  header_self, header_references,
+                                  header_in_reply_to)
     return result
