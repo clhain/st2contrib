@@ -83,12 +83,12 @@ class ProcessEmailHeaders(Action):
     if allowed_domains:
       for domain in allowed_domains:
         for addr_tuple in header_from:
-          if re.search('@'+domain+'$', addr_tuple[1]):
+          if re.search('@'+domain.lower()+'$', addr_tuple[1].lower()):
             return True
     if allowed_users:
       for user in allowed_users:
         for addr_tuple in header_from:
-          if re.search('^'+user+'$', addr_tuple[1]):
+          if re.search('^'+user.lower()+'$', addr_tuple[1].lower()):
             return True
     return False
 
