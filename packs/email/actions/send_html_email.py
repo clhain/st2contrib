@@ -61,7 +61,10 @@ class SendEmail(Action):
     msg_root['Cc'] = email_cc
     msg_root['References'] = email_references
     msg_root['In-Reply-To'] = email_in_reply_to
-    toaddrs = email_to.split(', ') + email_cc.split(', ')
+    if email_cc:
+      toaddrs = email_to.split(', ') + email_cc.split(', ')
+    else:
+      toaddrs = email_to.split(', ')
     msg_root.preamble = 'This is a multi-part message in MIME format.'
     msg_alt = MIMEMultipart('alternative')
     msg_root.attach(msg_alt)
